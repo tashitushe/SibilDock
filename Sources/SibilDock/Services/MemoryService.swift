@@ -17,6 +17,10 @@ final class MemoryService: ObservableObject {
         }
     }
 
+    deinit {
+        timer?.invalidate()
+    }
+
     func refresh() {
         var stats = vm_statistics64()
         var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)

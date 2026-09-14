@@ -22,6 +22,10 @@ final class NetworkSpeedService: ObservableObject {
         }
     }
 
+    deinit {
+        timer?.invalidate()
+    }
+
     private func sample() {
         let (bytesIn, bytesOut) = Self.readInterfaceCounters()
         let now = Date()

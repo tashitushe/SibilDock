@@ -1,4 +1,5 @@
 .build/
 .swiftpm/
 SibilDock.app/
+*.zip
 .DS_Store

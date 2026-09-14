@@ -39,7 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let content = DockView(onSizeChange: { [weak self] size in
             self?.layoutPanel(size: size)
         })
-        let hosting = NSHostingView(rootView: content)
+        let hosting = DraggableHostingView(rootView: content)
         hosting.frame = NSRect(origin: .zero, size: placeholderSize)
 
         let panel = FloatingPanel(contentRect: NSRect(origin: initialOrigin(for: placeholderSize), size: placeholderSize))
@@ -147,7 +147,9 @@ final class FloatingPanel: NSPanel {
         isOpaque = false
         backgroundColor = .clear
         hasShadow = true
-        isMovableByWindowBackground = true
+        // Dragging is handled manually by DraggableHostingView instead — see its
+        // doc comment for why isMovableByWindowBackground isn't reliable here.
+        isMovableByWindowBackground = false
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         ignoresMouseEvents = false

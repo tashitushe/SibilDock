@@ -14,7 +14,7 @@ enum DockOrientation: String, CaseIterable, Identifiable {
 }
 
 enum WidgetKind: String, CaseIterable, Identifiable {
-    case battery, weather, nowPlaying, clock
+    case battery, weather, nowPlaying, clock, network, memory
 
     var id: String { rawValue }
     var label: String {
@@ -23,6 +23,8 @@ enum WidgetKind: String, CaseIterable, Identifiable {
         case .weather: return "Weather"
         case .nowPlaying: return "Now Playing"
         case .clock: return "Clock"
+        case .network: return "Network Speed"
+        case .memory: return "Memory"
         }
     }
 }

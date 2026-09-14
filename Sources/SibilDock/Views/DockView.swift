@@ -35,6 +35,8 @@ struct DockView: View {
         case .weather: WeatherTileWidget()
         case .nowPlaying: NowPlayingTileWidget()
         case .clock: ClockTileWidget()
+        case .network: NetworkTileWidget()
+        case .memory: MemoryTileWidget()
         }
     }
 }

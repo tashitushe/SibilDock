@@ -11,6 +11,8 @@ icon.
 - **Weather** — current temperature and conditions for your location
 - **Now Playing** — play/pause with a progress ring, reading from Music or Spotify
 - **Clock** — time and weekday
+- **Network Speed** — live download/upload throughput
+- **Memory** — RAM usage ring
 
 ## Features
 

@@ -22,28 +22,48 @@ struct SettingsView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Widget order")
+                Text("Widgets")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
-                Text("Drag to reorder")
+                Text("Drag to reorder, toggle to show or hide")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
 
                 List {
                     ForEach(settings.widgetOrder) { kind in
-                        Text(kind.label)
-                            .font(.system(size: 12))
+                        HStack {
+                            Text(kind.label)
+                                .font(.system(size: 12))
+                            Spacer()
+                            Toggle("", isOn: isEnabledBinding(for: kind))
+                                .labelsHidden()
+                                .toggleStyle(.switch)
+                                .controlSize(.small)
+                        }
                     }
                     .onMove { indices, newOffset in
                         settings.widgetOrder.move(fromOffsets: indices, toOffset: newOffset)
                     }
                 }
                 .listStyle(.inset)
-                .frame(height: 150)
+                .frame(height: 170)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
         }
         .padding(20)
-        .frame(width: 300)
+        .frame(width: 320)
+    }
+
+    private func isEnabledBinding(for kind: WidgetKind) -> Binding<Bool> {
+        Binding(
+            get: { !settings.disabledWidgets.contains(kind) },
+            set: { isOn in
+                if isOn {
+                    settings.disabledWidgets.remove(kind)
+                } else {
+                    settings.disabledWidgets.insert(kind)
+                }
+            }
+        )
     }
 }

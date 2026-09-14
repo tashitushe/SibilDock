@@ -43,10 +43,20 @@ final class DockSettings: ObservableObject {
     @Published var widgetOrder: [WidgetKind] {
         didSet { UserDefaults.standard.set(widgetOrder.map(\.rawValue), forKey: Keys.order) }
     }
+    @Published var disabledWidgets: Set<WidgetKind> {
+        didSet { UserDefaults.standard.set(disabledWidgets.map(\.rawValue), forKey: Keys.disabled) }
+    }
+
+    /// Widgets in `widgetOrder` order, minus the ones the user turned off —
+    /// what the dock should actually render.
+    var enabledWidgets: [WidgetKind] {
+        widgetOrder.filter { !disabledWidgets.contains($0) }
+    }
 
     private enum Keys {
         static let orientation = "SibilDockOrientation"
         static let order = "SibilDockWidgetOrder"
+        static let disabled = "SibilDockDisabledWidgets"
     }
 
     private init() {
@@ -63,6 +73,12 @@ final class DockSettings: ObservableObject {
             widgetOrder = saved + missing
         } else {
             widgetOrder = WidgetKind.allCases
+        }
+
+        if let savedDisabled = UserDefaults.standard.array(forKey: Keys.disabled) as? [String] {
+            disabledWidgets = Set(savedDisabled.compactMap(WidgetKind.init(rawValue:)))
+        } else {
+            disabledWidgets = []
         }
     }
 }

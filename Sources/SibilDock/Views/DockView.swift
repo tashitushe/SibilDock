@@ -9,11 +9,11 @@ struct DockView: View {
         Group {
             if settings.orientation == .vertical {
                 VStack(spacing: DockMetrics.tileSpacing) {
-                    ForEach(settings.widgetOrder) { tile(for: $0) }
+                    ForEach(settings.enabledWidgets) { tile(for: $0) }
                 }
             } else {
                 HStack(spacing: DockMetrics.tileSpacing) {
-                    ForEach(settings.widgetOrder) { tile(for: $0) }
+                    ForEach(settings.enabledWidgets) { tile(for: $0) }
                 }
             }
         }

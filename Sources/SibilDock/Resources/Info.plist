@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>com.farnoud.sibildock</string>
+	<key>CFBundleName</key>
+	<string>SibilDock</string>
+	<key>CFBundleDisplayName</key>
+	<string>SibilDock</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleExecutable</key>
+	<string>SibilDock</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SibilDock uses your location to show the local weather forecast in the widget bar.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>SibilDock uses your location to show the local weather forecast in the widget bar.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>SibilDock asks Music or Spotify for the current track so it can show it in the Now Playing widget.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+</dict>
+</plist>

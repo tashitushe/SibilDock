@@ -1,0 +1,49 @@
+import SwiftUI
+
+struct SettingsView: View {
+    @ObservedObject private var settings = DockSettings.shared
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text("SibilDock Settings")
+                .font(.system(size: 15, weight: .semibold))
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Dock layout")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.secondary)
+                Picker("", selection: $settings.orientation) {
+                    ForEach(DockOrientation.allCases) { orientation in
+                        Text(orientation.label).tag(orientation)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Widget order")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.secondary)
+                Text("Drag to reorder")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+
+                List {
+                    ForEach(settings.widgetOrder) { kind in
+                        Text(kind.label)
+                            .font(.system(size: 12))
+                    }
+                    .onMove { indices, newOffset in
+                        settings.widgetOrder.move(fromOffsets: indices, toOffset: newOffset)
+                    }
+                }
+                .listStyle(.inset)
+                .frame(height: 150)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+        }
+        .padding(20)
+        .frame(width: 300)
+    }
+}

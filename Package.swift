@@ -8,7 +8,7 @@ let package = Package(
         .executableTarget(
             name: "SibilDock",
             path: "Sources/SibilDock",
-            exclude: ["Resources/Info.plist", "Resources/AppIcon.icns"],
+            exclude: ["Resources/Info.plist", "Resources/AppIcon.icns", "Resources/MediaRemoteAdapter"],
             linkerSettings: [
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",

@@ -9,7 +9,7 @@ icon.
 
 - **Battery & Wi-Fi** — battery ring (blue while charging, orange when low) with a Wi-Fi status badge
 - **Weather** — current temperature and conditions for your location
-- **Now Playing** — play/pause with a progress ring, reading from Music or Spotify
+- **Now Playing** — play/pause with a progress ring; reads from and controls whatever app is currently playing system-wide (the same set Control Center's Now Playing shows), with Music/Spotify AppleScript as a fallback
 - **Clock** — time and weekday
 - **Network Speed** — live download/upload throughput
 - **Memory** — RAM usage ring
@@ -46,4 +46,8 @@ open SibilDock.app
 ## Permissions
 
 - **Location** — only used to fetch the local weather forecast
-- **Automation (Apple Events)** — used to read now-playing info from Music/Spotify
+- **Automation (Apple Events)** — used by the Music/Spotify fallback path for Now Playing
+
+## Acknowledgments
+
+- [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) (BSD-3-Clause) powers the system-wide Now Playing widget.

@@ -21,6 +21,9 @@ cp "Sources/SibilDock/Resources/Info.plist" "$APP/Contents/Info.plist"
 if [ -f "Sources/SibilDock/Resources/AppIcon.icns" ]; then
     cp "Sources/SibilDock/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 fi
+if [ -d "Sources/SibilDock/Resources/MediaRemoteAdapter" ]; then
+    cp -R "Sources/SibilDock/Resources/MediaRemoteAdapter" "$APP/Contents/Resources/MediaRemoteAdapter"
+fi
 
 codesign --force --deep --sign - "$APP"
 

@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 struct DockView: View {
     @ObservedObject private var settings = DockSettings.shared
@@ -20,12 +19,6 @@ struct DockView: View {
         .padding(DockMetrics.outerPadding)
         .fixedSize()
         .reportSize(onSizeChange)
-        .contextMenu {
-            Button("Settings…") { WindowManager.shared.showSettings() }
-            Button("About SibilDock") { WindowManager.shared.showAbout() }
-            Divider()
-            Button("Quit SibilDock") { NSApplication.shared.terminate(nil) }
-        }
     }
 
     @ViewBuilder

@@ -21,7 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// No menu bar icon, so this is the only affordance to quit — reached via
-    /// the dock's right-click context menu (see DockView).
+    /// the dock's right-click menu (see `showDockMenu`).
     private func registerLoginItemIfNeeded() {
         guard SMAppService.mainApp.status != .enabled else { return }
         try? SMAppService.mainApp.register()
@@ -44,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let panel = FloatingPanel(contentRect: NSRect(origin: initialOrigin(for: placeholderSize), size: placeholderSize))
         panel.contentView = hosting
+        panel.onRightClick = { [weak self] event in self?.showDockMenu(with: event) }
         self.panel = panel
         panel.orderFrontRegardless()
 
@@ -99,11 +100,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             panel.setFrameOrigin(origin)
         }
     }
+
+    /// A native AppKit menu, shown by the panel's own `rightMouseDown` override —
+    /// deliberately not SwiftUI's `.contextMenu`, which makes its whole view hit-testable
+    /// and breaks `isMovableByWindowBackground` (dragging stops working anywhere on the dock).
+    private func showDockMenu(with event: NSEvent) {
+        guard let panel, let contentView = panel.contentView else { return }
+
+        let menu = NSMenu()
+        menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: "").target = self
+        menu.addItem(withTitle: "About SibilDock", action: #selector(openAbout), keyEquivalent: "").target = self
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Quit SibilDock", action: #selector(quit), keyEquivalent: "").target = self
+
+        NSMenu.popUpContextMenu(menu, with: event, for: contentView)
+    }
+
+    @MainActor @objc private func openSettings() {
+        WindowManager.shared.showSettings()
+    }
+
+    @MainActor @objc private func openAbout() {
+        WindowManager.shared.showAbout()
+    }
+
+    @MainActor @objc private func quit() {
+        NSApplication.shared.terminate(nil)
+    }
 }
 
 /// A borderless, non-activating panel that floats above nearly everything,
 /// follows the user across Spaces and full-screen apps, and never steals focus.
 final class FloatingPanel: NSPanel {
+    var onRightClick: ((NSEvent) -> Void)?
+
     init(contentRect: NSRect) {
         super.init(
             contentRect: contentRect,
@@ -127,4 +157,12 @@ final class FloatingPanel: NSPanel {
 
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
+
+    override func rightMouseDown(with event: NSEvent) {
+        if let onRightClick {
+            onRightClick(event)
+        } else {
+            super.rightMouseDown(with: event)
+        }
+    }
 }

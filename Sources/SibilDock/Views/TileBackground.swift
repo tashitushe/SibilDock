@@ -17,10 +17,7 @@ struct TileBackground: ViewModifier {
             .frame(width: DockMetrics.tileSize, height: DockMetrics.tileSize)
             .background(
                 ZStack {
-                    RoundedRectangle(cornerRadius: DockMetrics.cornerRadius, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                    RoundedRectangle(cornerRadius: DockMetrics.cornerRadius, style: .continuous)
-                        .fill(Color.black.opacity(0.35))
+                    DockVisualEffectView()
                     RoundedRectangle(cornerRadius: DockMetrics.cornerRadius, style: .continuous)
                         .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
                 }

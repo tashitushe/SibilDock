@@ -20,6 +20,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
+    /// A last-chance flush in case shutdown/restart cuts the process before
+    /// the position from the last drag made it to disk.
+    func applicationWillTerminate(_ notification: Notification) {
+        savePosition()
+    }
+
     /// No menu bar icon, so this is the only affordance to quit — reached via
     /// the dock's right-click menu (see `showDockMenu`).
     private func registerLoginItemIfNeeded() {
@@ -74,18 +80,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func initialOrigin(for size: CGSize) -> CGPoint {
         guard let screen = NSScreen.main else { return .zero }
-        let screenFrame = screen.visibleFrame
-        let defaultOrigin = CGPoint(x: screenFrame.minX + 16, y: screenFrame.midY - size.height / 2)
+        let visibleFrame = screen.visibleFrame
+        let defaultOrigin = CGPoint(x: visibleFrame.minX + 16, y: visibleFrame.midY - size.height / 2)
 
         guard let saved = UserDefaults.standard.string(forKey: savedOriginKey) else { return defaultOrigin }
         let origin = NSPointFromString(saved)
         let bounds = NSRect(origin: origin, size: size)
-        return screenFrame.intersects(bounds) ? origin : defaultOrigin
+        // The panel floats above the real Dock and menu bar, so a saved spot
+        // overlapping them is still perfectly valid — only fall back to the
+        // default if the saved spot is off the screen entirely. Checking
+        // against visibleFrame here (which excludes those reserved regions)
+        // was rejecting exactly the spots users are most likely to drag the
+        // dock to, resetting its position on every relaunch.
+        return screen.frame.intersects(bounds) ? origin : defaultOrigin
     }
 
+    /// `UserDefaults` writes are normally batched to disk lazily, which is
+    /// fine for a quit initiated by the user — but a system restart can kill
+    /// the process before that happens, silently dropping the last drag's
+    /// position. `synchronize()` forces it to disk immediately so a restart
+    /// can't lose it.
     private func savePosition() {
         guard let origin = panel?.frame.origin else { return }
         UserDefaults.standard.set(NSStringFromPoint(origin), forKey: savedOriginKey)
+        UserDefaults.standard.synchronize()
     }
 
     /// If the display configuration changes (monitor unplugged, resolution
@@ -93,10 +111,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// left-edge spot rather than leaving it somewhere unreachable.
     @objc private func screenParametersChanged() {
         guard let panel, let screen = NSScreen.main else { return }
-        let screenFrame = screen.visibleFrame
-        if !screenFrame.intersects(panel.frame) {
+        if !screen.frame.intersects(panel.frame) {
+            let visibleFrame = screen.visibleFrame
             let size = panel.frame.size
-            let origin = CGPoint(x: screenFrame.minX + 16, y: screenFrame.midY - size.height / 2)
+            let origin = CGPoint(x: visibleFrame.minX + 16, y: visibleFrame.midY - size.height / 2)
             panel.setFrameOrigin(origin)
         }
     }
@@ -111,6 +129,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: "").target = self
         menu.addItem(withTitle: "About SibilDock", action: #selector(openAbout), keyEquivalent: "").target = self
         menu.addItem(.separator())
+        menu.addItem(withTitle: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "").target = self
+        menu.addItem(.separator())
         menu.addItem(withTitle: "Quit SibilDock", action: #selector(quit), keyEquivalent: "").target = self
 
         NSMenu.popUpContextMenu(menu, with: event, for: contentView)
@@ -122,6 +142,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @MainActor @objc private func openAbout() {
         WindowManager.shared.showAbout()
+    }
+
+    @MainActor @objc private func checkForUpdates() {
+        UpdateChecker.shared.checkForUpdates()
     }
 
     @MainActor @objc private func quit() {

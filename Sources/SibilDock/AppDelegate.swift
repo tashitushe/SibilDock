@@ -27,10 +27,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
 
+        // `@Published`'s publisher emits during willSet, before the property
+        // is actually stored — so re-reading DockSettings.shared.attachmentMode
+        // from inside this subscriber would see the *previous* mode, not the
+        // one just selected (exactly backwards). Using the emitted value
+        // directly instead sidesteps that entirely.
         DockSettings.shared.$attachmentMode
             .dropFirst()
             .removeDuplicates()
-            .sink { [weak self] _ in self?.setupForCurrentMode() }
+            .sink { [weak self] mode in self?.setupForCurrentMode(mode) }
             .store(in: &cancellables)
 
         // Widget list changes (from Settings) only need to resize the
@@ -60,9 +65,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Mode switching
 
     @MainActor
-    private func setupForCurrentMode() {
+    private func setupForCurrentMode(_ mode: AttachmentMode? = nil) {
         tearDownPanels()
-        switch DockSettings.shared.attachmentMode {
+        switch mode ?? DockSettings.shared.attachmentMode {
         case .floating: setupFloatingPanel()
         case .edgeAttached: setupEdgePanel()
         }

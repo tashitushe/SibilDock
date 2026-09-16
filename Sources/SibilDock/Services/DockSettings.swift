@@ -61,6 +61,9 @@ final class DockSettings: ObservableObject {
     @Published var disabledWidgets: Set<WidgetKind> {
         didSet { UserDefaults.standard.set(disabledWidgets.map(\.rawValue), forKey: Keys.disabled) }
     }
+    @Published var hidesDuringFullScreen: Bool {
+        didSet { UserDefaults.standard.set(hidesDuringFullScreen, forKey: Keys.hidesDuringFullScreen) }
+    }
 
     /// Widgets in `widgetOrder` order, minus the ones the user turned off —
     /// what the dock should actually render.
@@ -73,6 +76,7 @@ final class DockSettings: ObservableObject {
         static let attachmentMode = "SibilDockAttachmentMode"
         static let order = "SibilDockWidgetOrder"
         static let disabled = "SibilDockDisabledWidgets"
+        static let hidesDuringFullScreen = "SibilDockHidesDuringFullScreen"
     }
 
     private init() {
@@ -102,6 +106,12 @@ final class DockSettings: ObservableObject {
             disabledWidgets = Set(savedDisabled.compactMap(WidgetKind.init(rawValue:)))
         } else {
             disabledWidgets = []
+        }
+
+        if UserDefaults.standard.object(forKey: Keys.hidesDuringFullScreen) != nil {
+            hidesDuringFullScreen = UserDefaults.standard.bool(forKey: Keys.hidesDuringFullScreen)
+        } else {
+            hidesDuringFullScreen = true
         }
     }
 }

@@ -40,6 +40,11 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Toggle("Hide over full-screen apps", isOn: $settings.hidesDuringFullScreen)
+                .font(.system(size: 12))
+                .toggleStyle(.switch)
+                .controlSize(.small)
+
             VStack(alignment: .leading, spacing: 6) {
                 Text("Widgets")
                     .font(.system(size: 12, weight: .medium))

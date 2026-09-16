@@ -47,6 +47,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .dropFirst()
             .sink { [weak self] _, _ in self?.relayoutEdgePanel() }
             .store(in: &cancellables)
+
+        // collectionBehavior and level are live NSWindow properties — no need
+        // to tear down and rebuild the panel, just apply them to whichever
+        // one exists.
+        DockSettings.shared.$hidesDuringFullScreen
+            .dropFirst()
+            .sink { [weak self] hides in
+                self?.floatingPanel?.collectionBehavior = Self.collectionBehavior(hidesDuringFullScreen: hides)
+                self?.floatingPanel?.level = Self.windowLevel(hidesDuringFullScreen: hides)
+                self?.edgePanel?.collectionBehavior = Self.collectionBehavior(hidesDuringFullScreen: hides)
+                self?.edgePanel?.level = Self.windowLevel(hidesDuringFullScreen: hides)
+            }
+            .store(in: &cancellables)
+    }
+
+    /// `.canJoinAllSpaces` is what makes the panel follow the user across
+    /// every regular desktop Space — that part stays on either way. Full
+    /// screen is a dedicated Space of its own, and a panel only joins that
+    /// one too if `.fullScreenAuxiliary` is also set (paired with a
+    /// privileged level — see windowLevel below); leaving it out is what
+    /// "hide during full screen" means here: nothing to show or animate,
+    /// the panel just isn't part of that Space at all.
+    private static func collectionBehavior(hidesDuringFullScreen: Bool) -> NSWindow.CollectionBehavior {
+        var behavior: NSWindow.CollectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+        if !hidesDuringFullScreen {
+            behavior.insert(.fullScreenAuxiliary)
+        }
+        return behavior
+    }
+
+    /// `.statusBar` is a privileged level the real menu bar/Dock use, and it
+    /// stays visible over full-screen spaces almost unconditionally —
+    /// collectionBehavior alone doesn't override that. `.floating` sits
+    /// above ordinary app windows too, but actually respects
+    /// collectionBehavior's full-screen-space membership, so it's what makes
+    /// "hide during full screen" work; `.statusBar` is only used when the
+    /// user explicitly wants the dock to show everywhere, full screen
+    /// included.
+    private static func windowLevel(hidesDuringFullScreen: Bool) -> NSWindow.Level {
+        hidesDuringFullScreen ? .floating : .statusBar
     }
 
     /// A last-chance flush in case shutdown/restart cuts the process before
@@ -106,6 +146,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let panel = FloatingPanel(contentRect: NSRect(origin: initialOrigin(for: placeholderSize), size: placeholderSize))
         panel.contentView = hosting
         panel.onRightClick = { [weak self] event in self?.showMenu(with: event) }
+        panel.collectionBehavior = Self.collectionBehavior(hidesDuringFullScreen: DockSettings.shared.hidesDuringFullScreen)
+        panel.level = Self.windowLevel(hidesDuringFullScreen: DockSettings.shared.hidesDuringFullScreen)
         self.floatingPanel = panel
         panel.orderFrontRegardless()
 
@@ -201,6 +243,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let panel = EdgePanel(contentRect: frame)
         panel.contentView = hosting
         panel.onRightClick = { [weak self] event in self?.showMenu(with: event) }
+        panel.collectionBehavior = Self.collectionBehavior(hidesDuringFullScreen: DockSettings.shared.hidesDuringFullScreen)
+        panel.level = Self.windowLevel(hidesDuringFullScreen: DockSettings.shared.hidesDuringFullScreen)
         self.edgePanel = panel
         panel.orderFrontRegardless()
     }
@@ -289,9 +333,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-/// A borderless, non-activating panel that floats above nearly everything,
-/// follows the user across Spaces and full-screen apps, and never steals
-/// focus. Used in `.floating` mode — draggable via DraggableHostingView.
+/// A borderless, non-activating panel that floats above nearly everything
+/// and never steals focus. Used in `.floating` mode — draggable via
+/// DraggableHostingView. Follows the user across regular Spaces always;
+/// whether it also shows over full-screen apps depends on the
+/// hidesDuringFullScreen setting (see AppDelegate.collectionBehavior).
 final class FloatingPanel: NSPanel {
     var onRightClick: ((NSEvent) -> Void)?
 
@@ -303,8 +349,8 @@ final class FloatingPanel: NSPanel {
             defer: false
         )
         isFloatingPanel = true
-        level = .statusBar
-        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+        // level and collectionBehavior are set by AppDelegate right after
+        // creation, based on the hidesDuringFullScreen setting.
         isOpaque = false
         backgroundColor = .clear
         hasShadow = true
@@ -345,8 +391,8 @@ final class EdgePanel: NSPanel {
             defer: false
         )
         isFloatingPanel = true
-        level = .statusBar
-        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+        // level and collectionBehavior are set by AppDelegate right after
+        // creation, based on the hidesDuringFullScreen setting.
         isOpaque = false
         backgroundColor = .clear
         hasShadow = true

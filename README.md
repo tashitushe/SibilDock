@@ -17,8 +17,10 @@ icon.
 ## Features
 
 - Floating and draggable — no fixed position, just drag it anywhere
-- Vertical or horizontal layout, switchable from Settings
+- Or edge-attached — pinned to the right screen edge, collapsed to a thin handle, expands on hover
+- Vertical or horizontal layout, switchable from Settings (floating mode)
 - Drag-to-reorder the widgets from Settings
+- Hides automatically over full-screen apps, so it never gets in the way (toggle in Settings)
 - Remembers its position and layout between launches
 - Launches at login by default
 - Right-click the dock for **Settings** and **About**

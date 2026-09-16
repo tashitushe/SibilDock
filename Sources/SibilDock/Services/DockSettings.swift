@@ -13,6 +13,18 @@ enum DockOrientation: String, CaseIterable, Identifiable {
     }
 }
 
+enum AttachmentMode: String, CaseIterable, Identifiable {
+    case floating, edgeAttached
+
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .floating: return "Floating"
+        case .edgeAttached: return "Edge-Attached"
+        }
+    }
+}
+
 enum WidgetKind: String, CaseIterable, Identifiable {
     case battery, weather, nowPlaying, clock, network, memory
 
@@ -40,6 +52,9 @@ final class DockSettings: ObservableObject {
     @Published var orientation: DockOrientation {
         didSet { UserDefaults.standard.set(orientation.rawValue, forKey: Keys.orientation) }
     }
+    @Published var attachmentMode: AttachmentMode {
+        didSet { UserDefaults.standard.set(attachmentMode.rawValue, forKey: Keys.attachmentMode) }
+    }
     @Published var widgetOrder: [WidgetKind] {
         didSet { UserDefaults.standard.set(widgetOrder.map(\.rawValue), forKey: Keys.order) }
     }
@@ -55,6 +70,7 @@ final class DockSettings: ObservableObject {
 
     private enum Keys {
         static let orientation = "SibilDockOrientation"
+        static let attachmentMode = "SibilDockAttachmentMode"
         static let order = "SibilDockWidgetOrder"
         static let disabled = "SibilDockDisabledWidgets"
     }
@@ -65,6 +81,13 @@ final class DockSettings: ObservableObject {
             orientation = value
         } else {
             orientation = .vertical
+        }
+
+        if let raw = UserDefaults.standard.string(forKey: Keys.attachmentMode),
+           let value = AttachmentMode(rawValue: raw) {
+            attachmentMode = value
+        } else {
+            attachmentMode = .floating
         }
 
         if let savedRaw = UserDefaults.standard.array(forKey: Keys.order) as? [String] {

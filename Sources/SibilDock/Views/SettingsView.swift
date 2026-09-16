@@ -9,16 +9,35 @@ struct SettingsView: View {
                 .font(.system(size: 15, weight: .semibold))
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Dock layout")
+                Text("Attachment")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
-                Picker("", selection: $settings.orientation) {
-                    ForEach(DockOrientation.allCases) { orientation in
-                        Text(orientation.label).tag(orientation)
+                Picker("", selection: $settings.attachmentMode) {
+                    ForEach(AttachmentMode.allCases) { mode in
+                        Text(mode.label).tag(mode)
                     }
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
+            }
+
+            if settings.attachmentMode == .floating {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Dock layout")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.secondary)
+                    Picker("", selection: $settings.orientation) {
+                        ForEach(DockOrientation.allCases) { orientation in
+                            Text(orientation.label).tag(orientation)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                }
+            } else {
+                Text("Edge-attached is always a vertical stack, pinned to the right edge — hover to expand, move away to collapse.")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
             }
 
             VStack(alignment: .leading, spacing: 6) {
